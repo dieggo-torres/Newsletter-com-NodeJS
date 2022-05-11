@@ -1,0 +1,22 @@
+{
+  "name": "newsletter-inscricao",
+  "version": "1.0.0",
+  "description": "Landing page para inscrição em newsletter.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "server": "nodemon app.js"
+  },
+  "keywords": [
+    "Newsletter",
+    "Inscrição",
+    "Mailchimp"
+  ],
+  "author": "Diego Moura Torres",
+  "license": "ISC",
+  "dependencies": {
+    "@mailchimp/mailchimp_marketing": "^3.0.75",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1"
+  }
+}
