@@ -10,13 +10,6 @@ const https = require('https')
 // Módulo para trabalhar com caminhos de arquivos e pasta
 const path = require('path')
 
-// Define a porta em que o servidor ouve requisições
-let port = process.env.PORT
-
-if (port == null || port == '') {
-    port = 8000
-}
-
 // Cria um servidor
 const app = express()
 
@@ -96,6 +89,9 @@ app.post('/', (req, res) => {
 app.post('/falha', (req, res) => {
     res.redirect('/')
 })
+
+// Define a porta em que o servidor ouve requisições
+let port = process.env.PORT || 3000
 
 // Faz o servidor express ouvir na porta especificada
 app.listen(port, () => {
