@@ -11,7 +11,11 @@ const https = require('https')
 const path = require('path')
 
 // Define a porta em que o servidor ouve requisições
-const porta = process.env.PORT || 3000
+let port = process.env.PORT
+
+if (port == null || port == '') {
+    port = 8000
+}
 
 // Cria um servidor
 const app = express()
@@ -94,7 +98,7 @@ app.post('/falha', (req, res) => {
 })
 
 // Faz o servidor express ouvir na porta especificada
-app.listen(porta, () => {
+app.listen(port, () => {
     // Exibe uma mensagem no console
     console.log(`Servidor Express ouvindo na porta ${porta}.`)
 })

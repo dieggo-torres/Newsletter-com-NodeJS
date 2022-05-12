@@ -20,4 +20,5 @@ Esses dados são processados e adicionados a uma audiência do MailChimp.
 
 -   express
 -   dotenv
--   @mailchimp/mailchimp_marketing
+-   https
+-   path
