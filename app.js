@@ -100,5 +100,5 @@ app.post('/falha', (req, res) => {
 // Faz o servidor express ouvir na porta especificada
 app.listen(port, () => {
     // Exibe uma mensagem no console
-    console.log(`Servidor Express ouvindo na porta ${porta}.`)
+    console.log(`Servidor Express ouvindo na porta ${port}.`)
 })
