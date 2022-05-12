@@ -1,64 +1,100 @@
-const express = require("express");
-const dotenv = require("dotenv").config();
-const path = require("path");
+// Módulo para criar um servidor
+const express = require('express')
 
-const porta = process.env.PORT || 3000;
+// Módulo para carregar variáveis de ambiente
+const dotenv = require('dotenv').config()
 
-const app = express();
+// Módulo para fazer requisições HTTPS do tipo POST
+const https = require('https')
 
-app.use(express.static("public"));
+// Módulo para trabalhar com caminhos de arquivos e pasta
+const path = require('path')
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Define a porta em que o servidor ouve requisições
+const porta = process.env.PORT || 3000
 
-const mailchimp = require("@mailchimp/mailchimp_marketing");
+// Cria um servidor
+const app = express()
 
-mailchimp.setConfig({
-    apiKey: process.env.MAILCHIMP_API_KEY,
-    server: process.env.MAILCHIMP_SERVER_PREFIX,
-});
+// Indica para o servidor a pasta que contém os ativos estáticos
+app.use(express.static('public'))
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/inscricao.html"));
-});
+// Permite fazer o parse do corpo das requisições
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.post("/", (req, res) => {
-    const idLista = process.env.MAILCHIMP_LIST_ID;
-    const inscrito = {
-        nome: req.body.nome,
-        sobrenome: req.body.sobrenome,
-        email: req.body.email,
-    };
+// Requisição GET para rota raiz
+app.get('/', (req, res) => {
+    // Envia o formulário de inscrição
+    res.sendFile(path.join(__dirname, '/inscricao.html'))
+})
 
-    async function adicionarMembro() {
-        try {
-            const resposta = await mailchimp.lists.addListMember(idLista, {
-                email_address: inscrito.email,
-                status: "subscribed",
+// Requisição POST (envio de formulário) para a rota raiz
+app.post('/', (req, res) => {
+    // Obtém os valores digitados nos campos do formulário
+    const nome = req.body.nome
+    const sobrenome = req.body.sobrenome
+    const email = req.body.email
+
+    // ID da audiência
+    const idLista = process.env.MAILCHIMP_LIST_ID
+
+    // Chave da API
+    const apiKey = process.env.MAILCHIMP_API_KEY
+
+    // Dados do novo contato para adicionar ao Mailchimp
+    const novoContato = {
+        members: [
+            {
+                email_address: email,
+                status: 'subscribed',
                 merge_fields: {
-                    FNAME: inscrito.nome,
-                    LNAME: inscrito.sobrenome,
+                    FNAME: nome,
+                    LNAME: sobrenome,
                 },
-            });
-
-            console.log(
-                `Contato adicionado com sucesso. O ID do contato é ${resposta.id}.`
-            );
-
-            res.sendFile(path.join(__dirname, "/sucesso.html"));
-        } catch (e) {
-            console.error(e.status);
-            res.sendFile(path.join(__dirname, "/falha.html"));
-        }
+            },
+        ],
     }
 
-    adicionarMembro();
-});
+    // Dados do novo contato em formato JSON
+    const novoContatoJSON = JSON.stringify(novoContato)
 
-app.post("/falha", (req, res) => {
-    res.redirect("/");
-});
+    // Endpoint da API
+    const url = `https://us6.api.mailchimp.com/3.0/lists/${idLista}`
 
+    // Opções da requisição com método e autenticação
+    const options = {
+        method: 'POST',
+        auth: `Diego:${apiKey}`,
+    }
+
+    // Variável que armazena a requisição
+    const requisicao = https.request(url, options, (resposta) => {
+        // Verifica o status da resposta
+        if (resposta.statusCode === 200) {
+            // Envia a página de sucesso
+            res.sendFile(path.join(__dirname, '/sucesso.html'))
+        } else {
+            // Envia a página de erro
+            res.sendFile(path.join(__dirname, '/falha.html'))
+        }
+        resposta.on('data', (data) => {
+            console.log(JSON.parse(data))
+        })
+    })
+
+    // Faz a requisição POST para os servidores do Mailchimp
+    requisicao.write(novoContatoJSON)
+    requisicao.end()
+})
+
+// Requisição POST para redirecionar o usuário para a página inicial
+app.post('/falha', (req, res) => {
+    res.redirect('/')
+})
+
+// Faz o servidor express ouvir na porta especificada
 app.listen(porta, () => {
-    console.log(`Servidor Express ouvindo na porta ${porta}.`);
-});
+    // Exibe uma mensagem no console
+    console.log(`Servidor Express ouvindo na porta ${porta}.`)
+})
