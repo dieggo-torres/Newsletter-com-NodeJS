@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const path = require("path");
 
-const porta = process.env.PORTA || 3000;
+const porta = process.env.PORT || 3000;
 
 const app = express();
 
@@ -53,6 +53,10 @@ app.post("/", (req, res) => {
     }
 
     adicionarMembro();
+});
+
+app.post("/falha", (req, res) => {
+    res.redirect("/");
 });
 
 app.listen(porta, () => {
